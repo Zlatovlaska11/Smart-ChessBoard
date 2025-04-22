@@ -3,7 +3,9 @@ mod errors;
 pub mod chess_game {
     use std::{io, ops::Index, usize};
 
-    use crate::chessboard::errors::chess_errors::MoveStructureError;
+    use crate::chessboard::errors::chess_errors::{ErrorType, MoveError};
+
+    use super::errors::chess_errors;
 
     #[derive(Clone, Copy, PartialEq, Eq)]
     enum Color {
@@ -141,7 +143,6 @@ pub mod chess_game {
 
     impl ChessBoard {
         pub fn new() -> ChessBoard {
-            let mut board: ChessBoard;
             let mut squares: [[Square; 8]; 8] = [[Square::new(None, 0, 0); 8]; 8];
 
             for x in 0..8 {
@@ -194,9 +195,25 @@ pub mod chess_game {
             }
         }
 
-        pub fn Move(&mut self, mv: String) -> Result<(), MoveStructureError> {
+        /// Chceks if a move is possible and if yes makes it
+        /// the move structure is parsed from a simple notation
+        /// (from rank, from file) (to rank, to file) for example "E2E4"
+        ///
+        /// Example:
+        ///
+        /// ```ignore
+        /// let mv_result = chessboard.move("E2E4".to_string());
+        ///
+        /// ```
+        /// # Errors
+        ///
+        /// This function will return an error if the move form is invalid or if the move itself is
+        /// invalid/imposible
+        pub fn Move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
             if mv.len() < 3 {
-                return Err(MoveStructureError);
+                return Err(MoveError {
+                    error_type: ErrorType::InvalidMoveStructure,
+                });
             }
 
             let y_from: i8 = get_coords_from_letter(mv.as_bytes()[0] as char).unwrap();
@@ -220,7 +237,7 @@ pub mod chess_game {
             if let Some(piece) = self.HasPiece(x_from, y_from) {
                 // normal move without any checking yet and no capture
                 if self.HasPiece(x_to, y_to).is_none() {
-                    if self.is_basic_valid_move(
+                    if self.is_move_valid(
                         piece.piece,
                         (y_from as i32, x_from as i32),
                         (y_to as i32, x_to as i32),
@@ -232,6 +249,10 @@ pub mod chess_game {
 
                         // substract the piece from the previous square
                         self.squares[x_from as usize][y_from as usize].piece = None;
+                    } else {
+                        return Err(MoveError {
+                            error_type: ErrorType::InvalidMove,
+                        });
                     }
                 }
             }
@@ -239,7 +260,7 @@ pub mod chess_game {
             return Ok(());
         }
 
-        fn is_basic_valid_move(
+        fn is_move_valid(
             &self,
             piece: PieceType,
             from: (i32, i32),

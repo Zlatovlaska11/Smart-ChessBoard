@@ -1,12 +1,23 @@
 pub mod chess_errors {
-    use std::fmt;
+    use std::fmt::{self, write};
 
     #[derive(Debug, Clone)]
-    pub struct MoveStructureError;
+    pub enum ErrorType {
+        InvalidMove,
+        InvalidMoveStructure,
+    }
 
-    impl fmt::Display for MoveStructureError {
+    #[derive(Debug, Clone)]
+    pub struct MoveError {
+        pub error_type: ErrorType,
+    }
+
+    impl fmt::Display for MoveError {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "Invalid Move structure")
+            match self.error_type {
+                ErrorType::InvalidMove => write!(f, "Invalid Move"),
+                ErrorType::InvalidMoveStructure => write!(f, "Invalid Move structure"),
+            }
         }
     }
 }

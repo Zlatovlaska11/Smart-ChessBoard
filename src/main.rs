@@ -9,19 +9,28 @@ fn main() {
 
     ChessBoard::PrintBoard(&chess);
 
+    let mv = chess.Move("E2E4".to_string());
 
-    chess.Move("E2E4".to_string());
+    println!("{:?}", mv);
+
+    ChessBoard::PrintBoard(&chess);
 
     println!();
+
+    let mv = chess.Move("E7E5".to_string());
+
+    println!("{:?}", mv);
 
     ChessBoard::PrintBoard(&chess);
 
     println!();
 
-    chess.Move("E7E5".to_string());
+    let mv = chess.Move("G1F3".to_string());
 
-    println!();
+    match mv {
+        Ok(_) => println!(),
+        Err(e) => println!("{}", e),
+    }
 
     ChessBoard::PrintBoard(&chess);
-
 }
