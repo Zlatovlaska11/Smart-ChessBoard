@@ -3,7 +3,10 @@ mod errors;
 pub mod chess_game {
     use std::{io, ops::Index, usize};
 
-    use crate::chessboard::errors::chess_errors::{ErrorType, MoveError};
+    use crate::{
+        chessboard::errors::chess_errors::{ErrorType, MoveError},
+        logger::{self, Logger},
+    };
 
     use super::errors::chess_errors;
 
@@ -193,6 +196,8 @@ pub mod chess_game {
                 self.squares[x][0].print_square();
                 println!()
             }
+
+            println!()
         }
 
         /// Chceks if a move is possible and if yes makes it
@@ -203,7 +208,6 @@ pub mod chess_game {
         ///
         /// ```ignore
         /// let mv_result = chessboard.move("E2E4".to_string());
-        ///
         /// ```
         /// # Errors
         ///
@@ -232,7 +236,9 @@ pub mod chess_game {
 
             // debug info about the move
             // TODO: later add a debug print module
-            println!("\n{}, {} -> {}, {}", y_from, x_from, y_to, x_to);
+            let mut logger = Logger;
+
+            logger.i(format!("moving from {}, {} to {}, {}", x_from, x_to, y_from, y_to).as_str());
 
             if let Some(piece) = self.HasPiece(x_from, y_from) {
                 // normal move without any checking yet and no capture
@@ -243,7 +249,7 @@ pub mod chess_game {
                         (y_to as i32, x_to as i32),
                         piece.color,
                     ) {
-                        println!("is valid");
+                        logger.i("this move is valid");
                         // add the piece to the designated square
                         self.squares[x_to as usize][y_to as usize].add_piece(piece);
 
