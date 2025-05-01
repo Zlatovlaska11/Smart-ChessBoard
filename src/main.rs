@@ -2,6 +2,7 @@ use chessboard::chess_game::{self, ChessBoard};
 
 pub mod chessboard;
 pub mod logger;
+pub mod parser;
 
 fn main() {
     let mut chess = chessboard::chess_game::ChessBoard::FromFEN(

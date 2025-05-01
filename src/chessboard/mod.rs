@@ -60,12 +60,12 @@ pub mod chess_game {
     }
 
     #[derive(Clone, Copy)]
-    struct Piece {
+    pub struct Piece {
         color: Color,
         piece: PieceType,
 
-        x: i8,
-        y: i8,
+        pub x: i8,
+        pub y: i8,
     }
 
     impl Piece {
@@ -85,6 +85,7 @@ pub mod chess_game {
 
             return "Black".to_string();
         }
+
     }
 
     #[derive(Clone, Copy)]
@@ -200,7 +201,7 @@ pub mod chess_game {
             println!()
         }
 
-        /// Chceks if a move is possible and if yes makes it
+        /// Checks if a move is possible and if yes makes it
         /// the move structure is parsed from a simple notation
         /// (from rank, from file) (to rank, to file) for example "E2E4"
         ///
@@ -322,7 +323,7 @@ pub mod chess_game {
         }
     }
 
-    fn get_coords_from_letter(mv: char) -> Option<i8> {
+    pub fn get_coords_from_letter(mv: char) -> Option<i8> {
         return match mv {
             'A' => Some(0),
             'B' => Some(1),
