@@ -3,6 +3,8 @@ mod errors;
 pub mod chess_game {
     use std::{io, ops::Index, usize};
 
+    use tokio::sync::mpsc;
+
     use crate::{
         chessboard::errors::chess_errors::{ErrorType, MoveError},
         logger::{self, Logger},
@@ -85,7 +87,6 @@ pub mod chess_game {
 
             return "Black".to_string();
         }
-
     }
 
     #[derive(Clone, Copy)]
@@ -143,10 +144,11 @@ pub mod chess_game {
     pub struct ChessBoard {
         squares: [[Square; 8]; 8],
         remaining_pieces: Vec<Piece>,
+        sender: mpsc::Sender<String>,
     }
 
     impl ChessBoard {
-        pub fn new() -> ChessBoard {
+        pub fn new(sender: mpsc::Sender<String>) -> ChessBoard {
             let mut squares: [[Square; 8]; 8] = [[Square::new(None, 0, 0); 8]; 8];
 
             for x in 0..8 {
@@ -156,6 +158,7 @@ pub mod chess_game {
             }
 
             return ChessBoard {
+                sender,
                 squares,
                 remaining_pieces: vec![],
             };
@@ -165,11 +168,11 @@ pub mod chess_game {
             return self.squares[rank as usize][file as usize].HasPiece();
         }
 
-        pub fn FromFEN(fen: String) -> ChessBoard {
+        pub fn FromFEN(fen: String, sender: mpsc::Sender<String>) -> ChessBoard {
             let mut file = 0;
             let mut rank = 7;
 
-            let mut board = ChessBoard::new();
+            let mut board = ChessBoard::new(sender);
 
             for x in fen.chars() {
                 if x == '/' {
@@ -251,6 +254,7 @@ pub mod chess_game {
                         piece.color,
                     ) {
                         logger.i("this move is valid");
+                        self.sender.send(mv);
                         // add the piece to the designated square
                         self.squares[x_to as usize][y_to as usize].add_piece(piece);
 

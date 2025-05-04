@@ -1,12 +1,25 @@
+use std::thread;
+
 use chessboard::chess_game::{self, ChessBoard};
+use tokio::sync::mpsc;
 
 pub mod chessboard;
+pub mod connector;
 pub mod logger;
 pub mod parser;
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    let (tx, rx) = mpsc::channel(32);
+
+    let thr = tokio::spawn(connector::run_server(rx));
+
+    // this is being created either too late or to early so the moves are never sent
+
+
     let mut chess = chessboard::chess_game::ChessBoard::FromFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".to_string(),
+        tx,
     );
 
     ChessBoard::PrintBoard(&chess);
@@ -37,4 +50,6 @@ fn main() {
     }
 
     ChessBoard::PrintBoard(&chess);
+
+
 }
