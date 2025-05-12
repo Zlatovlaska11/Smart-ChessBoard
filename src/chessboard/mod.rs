@@ -217,7 +217,7 @@ pub mod chess_game {
         ///
         /// This function will return an error if the move form is invalid or if the move itself is
         /// invalid/imposible
-        pub fn Move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
+        pub async fn Move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
             if mv.len() < 3 {
                 return Err(MoveError {
                     error_type: ErrorType::InvalidMoveStructure,
@@ -254,7 +254,7 @@ pub mod chess_game {
                         piece.color,
                     ) {
                         logger.i("this move is valid");
-                        self.sender.send(mv);
+                        let _ = self.sender.send(format!("{}\n", mv)).await;
                         // add the piece to the designated square
                         self.squares[x_to as usize][y_to as usize].add_piece(piece);
 

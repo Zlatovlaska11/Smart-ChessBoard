@@ -17,11 +17,13 @@ pub mod parser;
 #[tokio::main]
 async fn main() {
     let (tx, rx) = mpsc::channel(32);
-    let (ready_tx, _) = tokio::sync::oneshot::channel();
-
-    let _ = tx.send("START\n".to_string()).await;
+    let (ready_tx, ready_rx) = tokio::sync::oneshot::channel();
 
     let thr = tokio::spawn(connector::run_server(rx, ready_tx));
+
+    tx.send("server init")
+
+    sleep(Duration::from_millis(100)).await;
 
     let mut chess = chessboard::chess_game::ChessBoard::FromFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".to_string(),
@@ -30,7 +32,7 @@ async fn main() {
 
     ChessBoard::PrintBoard(&chess);
 
-    let mv = chess.Move("E2E4".to_string()).await;
+    let mv = chess.Move("E2E4".to_string());
 
     match mv {
         Ok(_) => println!(),
@@ -39,8 +41,7 @@ async fn main() {
 
     ChessBoard::PrintBoard(&chess);
 
-    sleep(Duration::from_secs(5)).await;
-    let mv = chess.Move("E7E5".to_string()).await;
+    let mv = chess.Move("E7E5".to_string());
 
     match mv {
         Ok(_) => println!(),
@@ -49,9 +50,8 @@ async fn main() {
 
     ChessBoard::PrintBoard(&chess);
 
-    let mv = chess.Move("G1F3".to_string()).await;
+    let mv = chess.Move("G1F3".to_string());
 
-    sleep(Duration::from_millis(100)).await;
     match mv {
         Ok(_) => println!(),
         Err(e) => println!("{}", e),
