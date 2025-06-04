@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["piece_map"],"trait":["map_parser"]};

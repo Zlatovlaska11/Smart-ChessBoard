@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Color","PieceType"],"fn":["get_coords_from_letter"],"struct":["ChessBoard","Piece","Square"]};
