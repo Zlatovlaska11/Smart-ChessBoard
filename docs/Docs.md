@@ -58,15 +58,21 @@ The Rust client is designed to run on embedded hardware like Raspberry Pi or Ard
 
 ## Client Architecture
 
-The system is multithreaded with a channel for chessboard to sender comunication
+The system is multithreaded with a channel for chessboard to sender communication
 
 ```
 +----------------------------------+       +---------------------------+       
-|   [ChessBoard](#chessboard-module)   | --->  |      [Connector Module](#connector-module)            |
+|         ChessBoard               | --->  |      Connector Module     |
 | - Creates a initial state        |       | - forwards moves to fe    |      
 | - move are being sent to channel |       | - holds connection via ws |     
-+----------------------------------+       +---------------------------+    
++----------------------------------+       +---------------------------+
 ```
+
+The client architecture:
+1. Event based -> channel awaits message that is sent on every move
+2. Move is sent to the [Sender](#connector-module) and send to backend
+3. On start of each game server is initialized and waits for a start position (fen)
+
 
 ## System Components
 
