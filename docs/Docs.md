@@ -85,6 +85,21 @@ The core of the system, implemented in `src/chessboard/mod.rs`, contains the che
 - FEN notation parsing for board setup
 - Console visualization of the chess board
 
+### Errors
+
+Custom error are implemented in `src/chessboard/errors.rs` that contains all the custom errors
+
+- Custom errors
+- Extendable with custom errors
+- `InvalidMove` and `InvalidMoveStructure` errors
+- Used in [ChessBoard](#chessboard-module) fen parisng and move making
+
+### Logger 
+
+Custom logger implementation in `src/logger.rs`
+
+- Logger implementation with info and error mode
+
 ### Connector Module
 
 Handles communication with the backend server:
