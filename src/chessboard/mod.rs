@@ -19,7 +19,7 @@ pub mod chess_game {
     }
 
     impl Color {
-        pub fn Get(x: i8, y: i8) -> Color {
+        pub fn get(x: i8, y: i8) -> Color {
             let mut square_color: Color = Color::Black;
             if (x + y) % 2 == 0 {
                 square_color = Color::White
@@ -28,7 +28,7 @@ pub mod chess_game {
             return square_color;
         }
 
-        pub fn FromSym(sym: char) -> Color {
+        pub fn from_sym(sym: char) -> Color {
             if sym.is_uppercase() {
                 return Color::White;
             }
@@ -79,14 +79,14 @@ pub mod chess_game {
     impl Piece {
         pub fn new(sym: char, x: i8, y: i8) -> Piece {
             return Piece {
-                color: Color::Get(x, y),
+                color: Color::get(x, y),
                 piece: PieceType::new(sym).expect("this shit aint working"),
                 x,
                 y,
             };
         }
 
-        pub fn printColor(&self) -> String {
+        pub fn print_color(&self) -> String {
             if self.color == Color::White {
                 return "White".to_string();
             }
@@ -106,13 +106,13 @@ pub mod chess_game {
 
     impl Square {
         fn new(piece: Option<Piece>, x: i8, y: i8) -> Self {
-            let mut SquareColor: Color = Color::Black;
+            let mut square_color: Color = Color::Black;
             if (x + y) % 2 == 0 {
-                SquareColor = Color::White
+                square_color = Color::White
             }
 
             Self {
-                square_color: SquareColor,
+                square_color,
                 piece,
                 x,
                 y,
@@ -122,7 +122,7 @@ pub mod chess_game {
         /// Checks if a square is ocupied by a piece
         /// if piece is there Some(piece) is returned otherwise
         /// returns None
-        pub fn HasPiece(&self) -> Option<Piece> {
+        pub fn has_piece(&self) -> Option<Piece> {
             if self.piece.is_some() {
                 return self.piece;
             }
@@ -177,8 +177,8 @@ pub mod chess_game {
 
         /// Abstraction over square haspiece
         /// checking if a square is ocupied
-        pub fn HasPiece(&self, rank: i8, file: i8) -> Option<Piece> {
-            return self.squares[rank as usize][file as usize].HasPiece();
+        pub fn has_piece(&self, rank: i8, file: i8) -> Option<Piece> {
+            return self.squares[rank as usize][file as usize].has_piece();
         }
 
         /// Takes a fen notation string and returns a chessboard with the
@@ -194,7 +194,7 @@ pub mod chess_game {
         ///```
         ///
         ///
-        pub fn FromFEN(fen: String, sender: mpsc::Sender<String>) -> ChessBoard {
+        pub fn from_fen(fen: String, sender: mpsc::Sender<String>) -> ChessBoard {
             let mut file = 0;
             let mut rank = 7;
 
@@ -223,7 +223,7 @@ pub mod chess_game {
         }
 
         /// Prints the board to the terminal [`ChessBoard`].
-        pub fn PrintBoard(&self) {
+        pub fn print_board(&self) {
             for x in 0..8 {
                 for y in 0..8 {
                     self.squares[x][y].print_square();
@@ -275,9 +275,9 @@ pub mod chess_game {
 
             logger.i(format!("moving from {}, {} to {}, {}", x_from, x_to, y_from, y_to).as_str());
 
-            if let Some(piece) = self.HasPiece(x_from, y_from) {
+            if let Some(piece) = self.has_piece(x_from, y_from) {
                 // normal move without any checking yet and no capture
-                if self.HasPiece(x_to, y_to).is_none() {
+                if self.has_piece(x_to, y_to).is_none() {
                     if self.is_move_valid(
                         piece.piece,
                         (y_from as i32, x_from as i32),

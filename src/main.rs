@@ -23,9 +23,9 @@ async fn main() {
     let startintg_pos = ready_rx.await.unwrap();
 
     let mut chess =
-        chessboard::chess_game::ChessBoard::FromFEN(startintg_pos.trim().to_string(), tx);
+        chessboard::chess_game::ChessBoard::from_fen(startintg_pos.trim().to_string(), tx);
 
-    ChessBoard::PrintBoard(&chess);
+    ChessBoard::print_board(&chess);
 
     let mv = chess.Move("E2E4".to_string()).await;
 
@@ -34,7 +34,7 @@ async fn main() {
         Err(e) => println!("{}", e),
     }
 
-    ChessBoard::PrintBoard(&chess);
+    ChessBoard::print_board(&chess);
 
     sleep(Duration::from_secs(5)).await;
     let mv = chess.Move("E7E5".to_string()).await;
@@ -44,7 +44,7 @@ async fn main() {
         Err(e) => println!("{}", e),
     }
 
-    ChessBoard::PrintBoard(&chess);
+    ChessBoard::print_board(&chess);
 
     let mv = chess.Move("G1F3".to_string()).await;
 
@@ -54,5 +54,5 @@ async fn main() {
         Err(e) => println!("{}", e),
     }
 
-    ChessBoard::PrintBoard(&chess);
+    ChessBoard::print_board(&chess);
 }

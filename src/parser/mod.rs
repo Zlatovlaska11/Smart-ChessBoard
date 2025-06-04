@@ -18,8 +18,8 @@ impl map_parser for piece_map {
 
         let mv = map
             .chessboard
-            .HasPiece(diff[0].0 as i8, diff[0].1 as i8)
-            .or(map.chessboard.HasPiece(diff[1].0 as i8, diff[1].1 as i8));
+            .has_piece(diff[0].0 as i8, diff[0].1 as i8)
+            .or(map.chessboard.has_piece(diff[1].0 as i8, diff[1].1 as i8));
 
         if mv.is_none() {
             Logger.e("eror ocured while parsing the move");
@@ -42,8 +42,8 @@ impl map_parser for piece_map {
 
         for x in 0..8 {
             for y in 0..8 {
-                if (map.chessboard.HasPiece(x, y).is_some() && !map.map[x as usize][y as usize])
-                    || (map.map[x as usize][y as usize] && map.chessboard.HasPiece(x, y).is_none())
+                if (map.chessboard.has_piece(x, y).is_some() && !map.map[x as usize][y as usize])
+                    || (map.map[x as usize][y as usize] && map.chessboard.has_piece(x, y).is_none())
                 {
                     moves.push((x as u8, y as u8));
                 }
