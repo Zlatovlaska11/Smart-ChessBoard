@@ -1,90 +1,76 @@
+# Smart-ChessBoard Documentation
 
-# ♟️ Smart Chess Board
+**Last Updated**: 2025-06-04
 
-A smart chess board system with a Rust-based embedded client and a Go-powered server for move processing, game visualization, and interaction.
+## Table of Contents
 
-## 📦 Project Overview
+1. [Project Overview](#project-overview)
+2. [Project Architecture](#project-architecture)
+3. [Client Architecture](#client-architecture)
+4. [System Components](#system-components)
+   - [Chessboard Module](#chessboard-module)
+   - [Connector Module](#connector-module)
+   - [Communication Protocol](#communication-protocol)
+5. [Data Structures](#data-structures)
+   - [ChessBoard](#chessboard)
+   - [Piece](#piece)
+   - [Square](#square)
+   - [Color](#color)
+   - [PieceType](#piecetype)
+6. [Core Functionalities](#core-functionalities)
+   - [Board Initialization](#board-initialization)
+   - [Move Validation](#move-validation)
+   - [Communication with Server](#communication-with-server)
+7. [Implementation Examples](#implementation-examples)
+8. [Future Development](#future-development)
 
-This project aims to bring together embedded systems, real-time communication, and chess logic to create a physical chess board that:
+## Project Overview
+
+Smart-ChessBoard is a Rust-based embedded client for a smart chess board system. The project aims to create a physical chess board that:
 
 - Detects and validates moves in real-time
+- Communicates with a backend server for move processing
 - Displays the current game state via a web interface
-- Can integrate with chess engines or online play in the future
+- Can potentially integrate with chess engines or online play
 
----
+The client is written in Rust for safety, speed, and low-level control, while the backend server is implemented in Go for simplicity, performance, and concurrency.
 
-## 🧱 Architecture
+## Project Architecture
+
+The system follows a three-tier architecture:
 
 ```
-+----------------------------+       +---------------------------+
-|     Rust Client (Board)   | --->  |      Go Server (Backend)  |
-| - Runs on RPi / Arduino   |       | - Validates moves         |
-| - Reads sensor input      |       | - Stores game state       |
-| - Sends moves via HTTP/gRPC|       | - Serves web UI / API     |
-+----------------------------+       +---------------------------+
++----------------------------+       +---------------------------+       +-------------------------------------+
+|     Rust Client (Board)    | --->  |      Go Server (Backend)  | --->  |   Frontend (Svelte)                 |
+| - Runs on RPi / Arduino    |       | - forwards moves to fe    |       | - ui of the app                     |
+| - Reads sensor input       |       | - holds connection via ws |       | - ws conn with go server            |
+| - Sends moves via tcp      |       |                           |  <--- | - svelte for simplicity and to learn|
++----------------------------+       +---------------------------+       +-------------------------------------+
 ```
 
----
-
-## ✨ Features (Planned)
-
-- ✅ Move detection from the physical board
-- ✅ Server-side validation and board state tracking
-- ✅ Web UI to visualize the current board and move history
-- 🚧 Support for UCI chess engines (e.g. Stockfish)
-- 🚧 Multiplayer / remote play via the smart board
-- 🚧 Puzzle / training mode with guided LEDs
+The Rust client is designed to run on embedded hardware like Raspberry Pi or Arduino, where it will:
+1. Initialize the board state (currently from FEN notation)
+2. Process user moves on the physical board
+3. Validate basic move legality
+4. Send move information to the server
+5. Update the local board state 
 
 
----
+## Client Architecture
 
-## 🛠 Tech Stack
+The system is multithreaded with a channel for chessboard to sender communication
 
-- **Rust** — for embedded systems (safe, fast, low-level control)
-- **Go** — for the backend server (simple, performant, easy concurrency)
-- **gRPC / REST** — for communication between board and server
+```
++----------------------------------+       +---------------------------+       
+|         ChessBoard               | --->  |      Connector Module     |
+| - Creates a initial state        |       | - forwards moves to fe    |      
+| - move are being sent to channel |       | - holds connection via ws |     
++----------------------------------+       +---------------------------+
+```
 
----
+The client architecture:
+1. Event based -> channel awaits message that is sent on every move
+2. Move is sent to the [Sender](#connector-module) and send to backend
+3. On start of each game server is initialized and waits for a start position (fen)
 
-## 🚀 Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/smart-chess-board.git
-   ```
-  
-3. Run the client (simulation for now):
-   ```bash
-   cd client
-   cargo run
-   ```
-
-4. Visit the web dashboard at `http://localhost:8080`
-
----
-
-## 🧪 Development Notes
-
-- Hardware integration will use GPIOs or serial via Rust on Raspberry Pi or Arduino
-- Until then, the client simulates moves
----
-
-## 📌 TODO
-
-- [ ] Design message protocol between client and server
-- [ ] Build board state manager in Go
-- [ ] Create simulation for client moves
-- [ ] UI for displaying board & move history
-- [ ] Hardware integration phase
-
----
-
-## 📖 License
-
-MIT – do whatever you want ✨
-
----
-
-## 🤝 Contributions
-
-Suggestions, improvements, and crazy feature ideas are always welcome! Open an issue or start a discussion.
