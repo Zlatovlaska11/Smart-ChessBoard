@@ -35,7 +35,7 @@ Smart-ChessBoard is a Rust-based embedded client for a smart chess board system.
 
 The client is written in Rust for safety, speed, and low-level control, while the backend server is implemented in Go for simplicity, performance, and concurrency.
 
-## Architecture
+## Project Architecture
 
 The system follows a three-tier architecture:
 
@@ -54,6 +54,19 @@ The Rust client is designed to run on embedded hardware like Raspberry Pi or Ard
 3. Validate basic move legality
 4. Send move information to the server
 5. Update the local board state 
+
+
+## Client Architecture
+
+The system is multithreaded with a channel for chessboard to sender comunication
+
+```
++----------------------------------+       +---------------------------+       
+|   [ChessBoard](#chessboard-module)   | --->  |      [Connector Module](#connector-module)            |
+| - Creates a initial state        |       | - forwards moves to fe    |      
+| - move are being sent to channel |       | - holds connection via ws |     
++----------------------------------+       +---------------------------+    
+```
 
 ## System Components
 
