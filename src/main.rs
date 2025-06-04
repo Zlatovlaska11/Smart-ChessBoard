@@ -1,11 +1,8 @@
 use std::time::Duration;
 
-use chessboard::chess_game::{self, ChessBoard};
+use chessboard::chess_game::ChessBoard;
 use tokio::{
-    sync::{
-        broadcast::{Receiver, Sender},
-        mpsc,
-    },
+    sync::mpsc,
     time::sleep,
 };
 
@@ -17,16 +14,16 @@ pub mod parser;
 #[tokio::main]
 async fn main() {
     let (tx, rx) = mpsc::channel(32);
-    let (ready_tx, _) = tokio::sync::oneshot::channel();
+    let (ready_tx, ready_rx) = tokio::sync::oneshot::channel();
 
     let _ = tx.send("START\n".to_string()).await;
 
-    let thr = tokio::spawn(connector::run_server(rx, ready_tx));
+    let _thr = tokio::spawn(connector::run_server(rx, ready_tx));
 
-    let mut chess = chessboard::chess_game::ChessBoard::FromFEN(
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".to_string(),
-        tx,
-    );
+    let startintg_pos = ready_rx.await.unwrap();
+
+    let mut chess =
+        chessboard::chess_game::ChessBoard::FromFEN(startintg_pos.trim().to_string(), tx);
 
     ChessBoard::PrintBoard(&chess);
 

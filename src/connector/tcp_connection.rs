@@ -26,9 +26,10 @@ impl client {
         self.stream.write_all(data).await
     }
 
-    // TODO strat listening for game start and FEN from tha frontend
-    // pub async fn GameStart(&mut self) -> String {
-    //
-    //
-    // }
+    pub async fn GameStart(&mut self) -> String {
+        let mut buffer = [0; 128];
+        self.stream.read(&mut buffer).await.unwrap();
+
+        String::from_utf8(buffer.to_vec()).unwrap()
+    }
 }

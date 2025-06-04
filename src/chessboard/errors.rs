@@ -1,5 +1,5 @@
 pub mod chess_errors {
-    use std::fmt::{self, write};
+    use std::fmt::{self};
 
     #[derive(Debug, Clone)]
     pub enum ErrorType {

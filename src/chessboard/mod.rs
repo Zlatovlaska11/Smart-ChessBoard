@@ -1,13 +1,13 @@
 mod errors;
 
 pub mod chess_game {
-    use std::{io, ops::Index, usize};
+    use std::usize;
 
     use tokio::sync::mpsc;
 
     use crate::{
         chessboard::errors::chess_errors::{ErrorType, MoveError},
-        logger::{self, Logger},
+        logger::Logger,
     };
 
     use super::errors::chess_errors;
@@ -48,6 +48,12 @@ pub mod chess_game {
     }
 
     impl PieceType {
+        /// Returns a new Piece type based on the char
+        ///
+        /// # None
+        ///
+        /// returns none if symbol is not matching any
+        /// piece type
         pub fn new(sym: char) -> Option<PieceType> {
             return match sym {
                 'N' | 'n' => Some(Self::Knight),
@@ -113,6 +119,9 @@ pub mod chess_game {
             }
         }
 
+        /// Checks if a square is ocupied by a piece
+        /// if piece is there Some(piece) is returned otherwise
+        /// returns None
         pub fn HasPiece(&self) -> Option<Piece> {
             if self.piece.is_some() {
                 return self.piece;
@@ -136,6 +145,8 @@ pub mod chess_game {
             }
         }
 
+        /// adds a piece to a square (force place)
+        /// if piece is here original piece is replaced
         fn add_piece(&mut self, piece: Piece) {
             self.piece = Option::Some(piece);
         }
@@ -164,10 +175,25 @@ pub mod chess_game {
             };
         }
 
+        /// Abstraction over square haspiece
+        /// checking if a square is ocupied
         pub fn HasPiece(&self, rank: i8, file: i8) -> Option<Piece> {
             return self.squares[rank as usize][file as usize].HasPiece();
         }
 
+        /// Takes a fen notation string and returns a chessboard with the
+        /// specified position
+        ///
+        /// # Example
+        ///
+        /// ```rs
+        ///     let mut chess = chessboard::chess_game::ChessBoard::FromFEN(
+        ///         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR".to_string(), // fen string
+        ///         tx, // mpsc sender: to forward moves to server
+        ///     );
+        ///```
+        ///
+        ///
         pub fn FromFEN(fen: String, sender: mpsc::Sender<String>) -> ChessBoard {
             let mut file = 0;
             let mut rank = 7;
@@ -175,13 +201,17 @@ pub mod chess_game {
             let mut board = ChessBoard::new(sender);
 
             for x in fen.chars() {
+                // println!("{}|{}|{}", x, file, rank);
                 if x == '/' {
                     file = 0;
                     rank -= 1;
                 } else {
-                    if (x.is_numeric()) {
+                    if x.is_numeric() {
                         file += x.to_string().parse::<i8>().unwrap();
                     } else {
+                        if file == 8 {
+                            return board;
+                        }
                         board.squares[rank as usize][file as usize]
                             .add_piece(Piece::new(x, rank as i8, file as i8));
                         file += 1;
@@ -192,6 +222,7 @@ pub mod chess_game {
             board
         }
 
+        /// Prints the board to the terminal [`ChessBoard`].
         pub fn PrintBoard(&self) {
             for x in 0..8 {
                 for y in 0..8 {
@@ -271,6 +302,8 @@ pub mod chess_game {
             return Ok(());
         }
 
+        /// checks if a move is valid
+        /// returns bool
         fn is_move_valid(
             &self,
             piece: PieceType,
