@@ -1,10 +1,7 @@
 use std::time::Duration;
 
 use chessboard::chess_game::ChessBoard;
-use tokio::{
-    sync::mpsc,
-    time::sleep,
-};
+use tokio::{sync::mpsc, time::sleep};
 
 pub mod chessboard;
 pub mod connector;
