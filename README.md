@@ -7,22 +7,6 @@
 1. [Project Overview](#project-overview)
 2. [Project Architecture](#project-architecture)
 3. [Client Architecture](#client-architecture)
-4. [System Components](#system-components)
-   - [Chessboard Module](#chessboard-module)
-   - [Connector Module](#connector-module)
-   - [Communication Protocol](#communication-protocol)
-5. [Data Structures](#data-structures)
-   - [ChessBoard](#chessboard)
-   - [Piece](#piece)
-   - [Square](#square)
-   - [Color](#color)
-   - [PieceType](#piecetype)
-6. [Core Functionalities](#core-functionalities)
-   - [Board Initialization](#board-initialization)
-   - [Move Validation](#move-validation)
-   - [Communication with Server](#communication-with-server)
-7. [Implementation Examples](#implementation-examples)
-8. [Future Development](#future-development)
 
 ## Project Overview
 
