@@ -1,28 +1,28 @@
 # Smart-ChessBoard Documentation
 
-**Repository**: [Zlatovlaska11/Smart-ChessBoard](https://github.com/Zlatovlaska11/Smart-ChessBoard)
 **Last Updated**: 2025-06-04
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Architecture](#architecture)
-3. [System Components](#system-components)
+2. [Project Architecture](#project-architecture)
+3. [Client Architecture](#client-architecture)
+4. [System Components](#system-components)
    - [Chessboard Module](#chessboard-module)
    - [Connector Module](#connector-module)
    - [Communication Protocol](#communication-protocol)
-4. [Data Structures](#data-structures)
+5. [Data Structures](#data-structures)
    - [ChessBoard](#chessboard)
    - [Piece](#piece)
    - [Square](#square)
    - [Color](#color)
    - [PieceType](#piecetype)
-5. [Core Functionalities](#core-functionalities)
+6. [Core Functionalities](#core-functionalities)
    - [Board Initialization](#board-initialization)
    - [Move Validation](#move-validation)
    - [Communication with Server](#communication-with-server)
-6. [Implementation Examples](#implementation-examples)
-7. [Future Development](#future-development)
+7. [Implementation Examples](#implementation-examples)
+8. [Future Development](#future-development)
 
 ## Project Overview
 
