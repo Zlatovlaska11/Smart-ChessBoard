@@ -1,7 +1,8 @@
 mod errors;
+pub mod puzzles;
 
 pub mod chess_game {
-    use std::usize;
+    use std::{ops::Index, usize};
 
     use tokio::sync::mpsc;
 
@@ -13,7 +14,7 @@ pub mod chess_game {
     use super::errors::chess_errors;
 
     /// Piece color enum
-    #[derive(Clone, Copy, PartialEq, Eq)]
+    #[derive(Clone, Copy, PartialEq, Eq, Debug)]
     enum Color {
         White,
         Black,
@@ -70,7 +71,7 @@ pub mod chess_game {
         }
     }
 
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Debug)]
     pub struct Piece {
         color: Color,
         piece: PieceType,
@@ -155,14 +156,28 @@ pub mod chess_game {
         }
     }
 
+    /// enum regarding the curent mode of play
+    pub enum TrainingMode {
+        Game,
+        OpeningPractice(Vec<String>), // Expected sequence
+        Puzzle {
+            fen: String,
+            solution: Vec<String>,
+            current_step: usize,
+        },
+        Hinting,
+    }
+
     pub struct ChessBoard {
         squares: [[Square; 8]; 8],
         remaining_pieces: Vec<Piece>,
         sender: mpsc::Sender<String>,
+        mode: TrainingMode,
+        curent_step: usize,
     }
 
     impl ChessBoard {
-        pub fn new(sender: mpsc::Sender<String>) -> ChessBoard {
+        pub fn new(sender: mpsc::Sender<String>, mode: TrainingMode, step: usize) -> ChessBoard {
             let mut squares: [[Square; 8]; 8] = [[Square::new(None, 0, 0); 8]; 8];
 
             for x in 0..8 {
@@ -175,7 +190,20 @@ pub mod chess_game {
                 sender,
                 squares,
                 remaining_pieces: vec![],
+                mode,
+                curent_step: step,
             };
+        }
+
+        /// Inits the chessboard in a puzzle mode
+        pub fn PuzzleMode(
+            sender: mpsc::Sender<String>,
+            mode: TrainingMode,
+            fen: String,
+            step: usize,
+        ) -> ChessBoard {
+            let board = ChessBoard::from_fen(fen, sender, mode, step);
+            board
         }
 
         /// Abstraction over square haspiece
@@ -197,11 +225,16 @@ pub mod chess_game {
         ///```
         ///
         ///
-        pub fn from_fen(fen: String, sender: mpsc::Sender<String>) -> ChessBoard {
+        pub fn from_fen(
+            fen: String,
+            sender: mpsc::Sender<String>,
+            mode: TrainingMode,
+            step: usize,
+        ) -> ChessBoard {
             let mut file = 0;
             let mut rank = 7;
 
-            let mut board = ChessBoard::new(sender);
+            let mut board = ChessBoard::new(sender, mode, step);
 
             for x in fen.chars() {
                 // println!("{}|{}|{}", x, file, rank);
@@ -216,7 +249,8 @@ pub mod chess_game {
                             return board;
                         }
                         board.squares[rank as usize][file as usize]
-                            .add_piece(Piece::new(x, rank as i8, file as i8));
+                            .add_piece(Piece::new(x, file as i8, rank as i8));
+
                         file += 1;
                     }
                 }
@@ -237,11 +271,75 @@ pub mod chess_game {
                 for y in 0..8 {
                     self.squares[x][y].print_square();
                 }
-                self.squares[x][0].print_square();
+                // self.squares[x][0].print_square();
                 println!()
             }
 
             println!()
+        }
+
+        /// Forcefully moves a piece from source to destination without any validation.
+        /// Used for puzzles where correctness is pre-validated.
+        async fn force_move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
+            let y_from: i8 = get_coords_from_letter(mv.as_bytes()[0] as char).unwrap();
+            let x_from: i8 = 8
+                - (mv.as_bytes()[1] as char)
+                    .to_string()
+                    .parse::<i8>()
+                    .unwrap();
+
+            let y_to: i8 = get_coords_from_letter(mv.as_bytes()[2] as char).unwrap();
+            let x_to: i8 = 8
+                - (mv.as_bytes()[3] as char)
+                    .to_string()
+                    .parse::<i8>()
+                    .unwrap();
+
+            println!(
+                "Trying to move from: ({}, {}) to ({}, {})",
+                x_from, y_from, x_to, y_to
+            );
+
+            println!("{:?}", self.squares[x_from as usize][y_from as usize].piece);
+            if let Some(piece) = self.has_piece(x_from, y_from) {
+                self.squares[x_to as usize][y_to as usize].add_piece(piece);
+                self.squares[x_from as usize][y_from as usize].piece = None;
+                let _ = self.sender.send(format!("{}\n", mv)).await;
+            } else {
+                return Err(MoveError {
+                    error_type: ErrorType::InvalidMove,
+                });
+            }
+
+            Ok(())
+        }
+
+        /// makes a move based on the gamemode
+        ///
+        /// for puzzles it checks if the answer is correct and makes a move
+        /// for normal games makes a move and nothing more
+        ///
+        /// and everything else is not yet made so throws a todo!
+        pub async fn Move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
+            match &self.mode {
+                TrainingMode::Game => self.MoveInGame(mv).await,
+                TrainingMode::OpeningPractice(items) => todo!(),
+                TrainingMode::Puzzle {
+                    fen: _,
+                    solution,
+                    current_step,
+                } => {
+                    if mv == *solution[*current_step] {
+                        self.curent_step += 1;
+                        self.force_move(mv).await
+                    } else {
+                        return Err(chess_errors::MoveError {
+                            error_type: chess_errors::ErrorType::WrongAnswearPuzzle,
+                        });
+                    }
+                }
+                TrainingMode::Hinting => todo!(),
+            }
         }
 
         /// Checks if a move is possible and if yes makes it
@@ -257,7 +355,7 @@ pub mod chess_game {
         ///
         /// This function will return an error if the move form is invalid or if the move itself is
         /// invalid/imposible
-        pub async fn Move(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
+        pub async fn MoveInGame(&mut self, mv: String) -> Result<(), chess_errors::MoveError> {
             if mv.len() < 3 {
                 return Err(MoveError {
                     error_type: ErrorType::InvalidMoveStructure,
@@ -296,7 +394,10 @@ pub mod chess_game {
                         logger.i("this move is valid");
                         let _ = self.sender.send(format!("{}\n", mv)).await;
                         // add the piece to the designated square
-                        self.squares[x_to as usize][y_to as usize].add_piece(piece);
+                        let mut moved_piece = piece;
+                        moved_piece.x = x_to;
+                        moved_piece.y = y_to;
+                        self.squares[x_to as usize][y_to as usize].add_piece(moved_piece);
 
                         // substract the piece from the previous square
                         self.squares[x_from as usize][y_from as usize].piece = None;

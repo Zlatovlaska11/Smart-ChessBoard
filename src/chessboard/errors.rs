@@ -5,6 +5,7 @@ pub mod chess_errors {
     pub enum ErrorType {
         InvalidMove,
         InvalidMoveStructure,
+        WrongAnswearPuzzle,
     }
 
     #[derive(Debug, Clone)]
@@ -17,6 +18,7 @@ pub mod chess_errors {
             match self.error_type {
                 ErrorType::InvalidMove => write!(f, "Invalid Move"),
                 ErrorType::InvalidMoveStructure => write!(f, "Invalid Move structure"),
+                ErrorType::WrongAnswearPuzzle => write!(f, "Wrong answer"),
             }
         }
     }
