@@ -36,7 +36,7 @@ async fn main() {
 
     ChessBoard::print_board(&chess);
 
-    sleep(Duration::from_secs(5)).await;
+    sleep(Duration::from_millis(1000)).await;
     let mv = chess.Move("E7E5".to_string()).await;
 
     match mv {

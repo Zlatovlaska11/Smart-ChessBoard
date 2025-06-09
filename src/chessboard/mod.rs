@@ -12,6 +12,7 @@ pub mod chess_game {
 
     use super::errors::chess_errors;
 
+    /// Piece color enum
     #[derive(Clone, Copy, PartialEq, Eq)]
     enum Color {
         White,
@@ -19,6 +20,7 @@ pub mod chess_game {
     }
 
     impl Color {
+        /// takes a square coordinates and returns the square color
         pub fn get(x: i8, y: i8) -> Color {
             let mut square_color: Color = Color::Black;
             if (x + y) % 2 == 0 {
@@ -28,6 +30,7 @@ pub mod chess_game {
             return square_color;
         }
 
+        /// Fen notation piece color
         pub fn from_sym(sym: char) -> Color {
             if sym.is_uppercase() {
                 return Color::White;
