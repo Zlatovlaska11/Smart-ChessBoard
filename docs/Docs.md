@@ -72,6 +72,7 @@ The client architecture:
 1. Event based -> channel awaits message that is sent on every move
 2. Move is sent to the [Sender](#connector-module) and send to backend
 3. On start of each game server is initialized and waits for a start position (fen)
+4. On game end "END" signal is sent to end the game and trigger frontend functionality
 
 
 ## System Components
@@ -92,7 +93,16 @@ Custom error are implemented in `src/chessboard/errors.rs` that contains all the
 - Custom errors
 - Extendable with custom errors
 - `InvalidMove` and `InvalidMoveStructure` errors
-- Used in [ChessBoard](#chessboard-module) fen parisng and move making
+- Used in [ChessBoard](#chessboard-module) fen parsing and move making
+
+### Config
+
+Config loading module to load config from toml files (default values implemented)
+
+- Config struct
+- Extendable for future model implementation 
+- Serde parsing 
+- Used in main module to init the connector module
 
 ### Logger 
 

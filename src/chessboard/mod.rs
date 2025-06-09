@@ -222,7 +222,13 @@ pub mod chess_game {
             board
         }
 
-        /// Prints the board to the terminal [`ChessBoard`].
+        /// Sends the End of game signal
+        pub async fn EndGame(&mut self) {
+            self.sender.send(format!("{}\n", "END")).await.unwrap();
+            println!("Send the end of game signal")
+        }
+
+        /// Prints the board to the terminal [`ChessBoard`]..
         pub fn print_board(&self) {
             for x in 0..8 {
                 for y in 0..8 {

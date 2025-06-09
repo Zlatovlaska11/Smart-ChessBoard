@@ -4,6 +4,7 @@ use chessboard::chess_game::ChessBoard;
 use tokio::{sync::mpsc, time::sleep};
 
 pub mod chessboard;
+pub mod config;
 pub mod connector;
 pub mod logger;
 pub mod parser;
@@ -13,9 +14,13 @@ async fn main() {
     let (tx, rx) = mpsc::channel(32);
     let (ready_tx, ready_rx) = tokio::sync::oneshot::channel();
 
+    let settings = config::Config::load("./config.toml".to_string());
+
+    println!("{:?}", settings);
+
     let _ = tx.send("START\n".to_string()).await;
 
-    let _thr = tokio::spawn(connector::run_server(rx, ready_tx));
+    let thr = tokio::spawn(connector::run_server(rx, ready_tx));
 
     let startintg_pos = ready_rx.await.unwrap();
 
@@ -52,4 +57,8 @@ async fn main() {
     }
 
     ChessBoard::print_board(&chess);
+
+    chess.EndGame().await;
+
+    thr.await.unwrap();
 }
