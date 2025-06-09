@@ -19,7 +19,7 @@ pub async fn run_server(
     while let Some(chesss_move) = reciever.recv().await {
         let _ = connection.send(chesss_move.as_bytes()).await;
 
-        println!("message sent succesfuly");
+        // println!("message sent succesfuly");
         if chesss_move == "END\n" {
             println!("sent end of game signal");
             return;
