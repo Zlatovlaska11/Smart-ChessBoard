@@ -1,9 +1,15 @@
 use tokio::sync::{mpsc, oneshot};
 
+use crate::config::Config;
+
 mod tcp_connection;
 
-pub async fn run_server(mut reciever: mpsc::Receiver<String>, ready_tx: oneshot::Sender<String>) {
-    let mut connection = tcp_connection::client::new("127.0.0.1".to_string(), 3333).await;
+pub async fn run_server(
+    mut reciever: mpsc::Receiver<String>,
+    ready_tx: oneshot::Sender<String>,
+    config: Config,
+) {
+    let mut connection = tcp_connection::client::new(config.ip, config.port as u32).await;
 
     let position = connection.GameStart().await;
 

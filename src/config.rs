@@ -10,9 +10,9 @@ fn default_port() -> u16 {
 #[derive(Default, Debug, Deserialize)]
 pub struct Config {
     #[serde(default = "default_wsserver")]
-    ip: String,
+    pub ip: String,
     #[serde(default = "default_port")]
-    port: u16,
+    pub port: u16,
 }
 
 impl Config {

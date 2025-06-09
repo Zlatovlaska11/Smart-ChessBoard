@@ -16,11 +16,9 @@ async fn main() {
 
     let settings = config::Config::load("./config.toml".to_string());
 
-    println!("{:?}", settings);
-
     let _ = tx.send("START\n".to_string()).await;
 
-    let thr = tokio::spawn(connector::run_server(rx, ready_tx));
+    let thr = tokio::spawn(connector::run_server(rx, ready_tx, settings));
 
     let startintg_pos = ready_rx.await.unwrap();
 
